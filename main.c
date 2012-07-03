@@ -1,5 +1,5 @@
 /*
-	Flips one dot
+Flips one dot
 */
 
 #include <libopencm3/stm32/f1/rcc.h>
@@ -10,6 +10,24 @@
 #define L1 0x8002
 #define H1 0x8004
 
+
+#define X_A GPIO0
+#define X_B GPIO1
+#define X_C GPIO2
+#define X_D GPIO3
+#define X_E GPIO4
+
+#define Y_A GPIO5
+#define Y_B GPIO6
+#define Y_C GPIO7
+
+#define select(x) gpio_clear(GPIOB, x)
+#define deselect(x) gpio_set(GPIOB, x)
+
+#define xnum 16
+#define ynum 28
+
+
 void init_clock();
 void init_gpio();
 void init_spi();
@@ -17,6 +35,9 @@ void init_spi();
 u8 buttonstate;
 u8 buttonon;
 u8 flippedoff;
+
+void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
+void flipsection(u8 hchip, u8 lchip);
 
 int main(void) {
 	init_clock();
@@ -29,7 +50,8 @@ int main(void) {
 	// Raise selects
 	gpio_set(GPIOB, GPIO0|GPIO1);
 
-	int i;
+	
+	int k;
 
 	buttonstate = 0;
 	buttonon = 0;
@@ -51,43 +73,18 @@ int main(void) {
 		}
 
 		// Else
+		u8 hchip, lchip;
 
-		// Raise Y_B
-		gpio_clear(GPIOB, GPIO0);
-		if(!flippedoff){
-			spi_xfer(SPI1, L1);
+		if(flippedoff) {
+			lchip = X_A;
+			hchip = Y_C;
 		} else {
-			spi_xfer(SPI1, H1);
-		}
-		gpio_set(GPIOB, GPIO0);
-		//Raise X_B
-		gpio_clear(GPIOB, GPIO1);
-		 if(flippedoff){
-			spi_xfer(SPI1, L1);
-		} else {
-			spi_xfer(SPI1, H1);
-		}
-		gpio_set(GPIOB, GPIO1);
-
-		gpio_set(GPIOC, GPIO8);
-
-		//Wait for a brief time
-		for(i = 0; i < 500000; i++) {
-			__asm__("nop");
+			lchip = Y_C;
+			hchip = X_A;
 		}
 
-		gpio_clear(GPIOC, GPIO8);
-
-		// Raise Y_B
-		gpio_clear(GPIOB, GPIO0);
-		 // clear
-		spi_xfer(SPI1, CL);
-		gpio_set(GPIOB, GPIO0);
-		//Raise X_B
-		gpio_clear(GPIOB, GPIO1);
-		 // Make Low 1
-		spi_xfer(SPI1, CL);
-		gpio_set(GPIOB, GPIO1);
+		flipsection(hchip, lchip);
+		
 
 		flippedoff = !flippedoff;
 		if(flippedoff) {
@@ -95,6 +92,99 @@ int main(void) {
 			gpio_set(GPIOC, GPIO9);
 		} else {
 			gpio_clear(GPIOC, GPIO9);
+		}
+
+		for(k = 0; k < 80000; k++) {
+			__asm__("nop");
+		}
+	}
+}
+void flip(int x, int y, char on) {
+	int i;
+	u8 pinx, piny;
+	if(x < 6) {
+		pinx = X_A;
+	} else if(x >= 6 && x < 12) {
+		pinx = X_B;
+		x -= 6;
+	} else if(x >= 12 && x < 18) {
+		pinx = X_C;
+		x -= 12;
+	} else if(x >= 18 && x < 24) {
+		pinx = X_D;
+		x -= 18;
+	} else if(x >= 24 && x < xnum) {
+		pinx = X_E;
+		x -= 24;
+	} else {
+		return;
+	}
+  
+	if(y < 6) {
+		piny = Y_A;
+	} else if(y > 5 && y < 12) {
+		piny = Y_B;
+		y -= 6;
+	} else if(y >= 12 && y < 16) {
+		piny = Y_C;
+		y -= 12;
+	} else {
+		return;
+	}
+  
+	u16 xpack, ypack;
+	ypack = xpack = CL;
+	if(on) {
+		xpack |= 0x2 << (x * 2);
+		ypack |= 0x4 << (y * 2);
+	} 
+	else {
+		xpack |= 0x4 << (x * 2);
+		ypack |= 0x2 << (y * 2);
+	}
+  
+	select(pinx);
+	spi_xfer(SPI1, xpack);
+	deselect(pinx);
+  
+	select(piny);
+	spi_xfer(SPI1, ypack);
+	deselect(piny);
+
+	for(i = 0; i < 3000; i++) {
+		__asm__("nop");
+	}
+
+	select(pinx|piny);
+	spi_xfer(SPI1, CL);
+	deselect(pinx|piny);
+}
+
+void simpleflip(u8 hchip, u8 lchip, u16 hind, u16 lind) {
+	int i;
+	gpio_clear(GPIOB, hchip);
+	spi_xfer(SPI1, (0x0004 << (hind * 2)) | CL);
+	gpio_set(GPIOB, hchip);
+	gpio_clear(GPIOB, lchip);
+	spi_xfer(SPI1, (0x0002 << (lind * 2)) | CL);
+	gpio_set(GPIOB, lchip);
+	for(i = 0; i < 3000; i++) {
+		__asm__("nop");
+	}
+	gpio_clear(GPIOB, hchip | lchip );
+	spi_xfer(SPI1, CL);
+	gpio_set(GPIOB, hchip | lchip);
+}
+
+void flipsection(u8 hchip, u8 lchip) {
+	u16 i, j;
+	int k;
+	for(i = 0; i < 6; i++) {
+		for(j = 0; j < 6; j++) {
+			simpleflip(hchip, lchip, j, i);
+			for(k = 0; k < 50; k++) {
+				__asm__("nop");
+			}
 		}
 	}
 }
@@ -119,7 +209,7 @@ void init_gpio() {
 	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ,
 		GPIO_CNF_OUTPUT_PUSHPULL, GPIO9);
 	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ,
-		      GPIO_CNF_OUTPUT_PUSHPULL, GPIO8);
+			  GPIO_CNF_OUTPUT_PUSHPULL, GPIO8);
 
 	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO0);
 
@@ -133,12 +223,8 @@ void init_gpio() {
 		GPIO_CNF_INPUT_PULL_UPDOWN, GPIO_SPI1_MISO);
 
 	// Slave Selects
-	// Y_B
 	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
-		GPIO_CNF_OUTPUT_PUSHPULL, GPIO0);
-	// X_A
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
-		GPIO_CNF_OUTPUT_PUSHPULL, GPIO1);
+		GPIO_CNF_OUTPUT_PUSHPULL, GPIO0 | GPIO1 | GPIO2 |GPIO3|GPIO4|GPIO5|GPIO6|GPIO7);
 }
 
 void init_spi() {
