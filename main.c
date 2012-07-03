@@ -21,11 +21,11 @@ Flips one dot
 #define Y_B GPIO6
 #define Y_C GPIO7
 
-#define select(x) gpio_clear(GPIOB, x)
-#define deselect(x) gpio_set(GPIOB, x)
+#define select(x) gpio_clear(GPIOC, x)
+#define deselect(x) gpio_set(GPIOC, x)
 
-#define xnum 16
-#define ynum 28
+#define xnum 28
+#define ynum 16
 
 
 void init_clock();
@@ -37,7 +37,11 @@ u8 buttonon;
 u8 flippedoff;
 
 void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
+void flip(u16 x, u16 y, u8 on);
 void flipsection(u8 hchip, u8 lchip);
+
+u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
+u8 y_chips[] = {Y_A, Y_B, Y_C};
 
 int main(void) {
 	init_clock();
@@ -48,9 +52,9 @@ int main(void) {
 	gpio_clear(GPIOC, GPIO9|GPIO8);
 
 	// Raise selects
-	gpio_set(GPIOB, GPIO0|GPIO1);
+	gpio_set(GPIOC, X_A|X_B|X_C|X_D|X_E|Y_A|Y_B|Y_C);
 
-	
+	u16 i, j;
 	int k;
 
 	buttonstate = 0;
@@ -73,17 +77,12 @@ int main(void) {
 		}
 
 		// Else
-		u8 hchip, lchip;
-
-		if(flippedoff) {
-			lchip = X_A;
-			hchip = Y_C;
-		} else {
-			lchip = Y_C;
-			hchip = X_A;
+		for(i = 0; i < ynum; i++) {
+			for (j=0; j < xnum; j++)
+			{
+				flip(j, i, flippedoff);
+			}
 		}
-
-		flipsection(hchip, lchip);
 		
 
 		flippedoff = !flippedoff;
@@ -99,9 +98,9 @@ int main(void) {
 		}
 	}
 }
-void flip(int x, int y, char on) {
+void flip(u16 x, u16 y, u8 on) {
 	int i;
-	u8 pinx, piny;
+	u32 pinx, piny;
 	if(x < 6) {
 		pinx = X_A;
 	} else if(x >= 6 && x < 12) {
@@ -223,7 +222,7 @@ void init_gpio() {
 		GPIO_CNF_INPUT_PULL_UPDOWN, GPIO_SPI1_MISO);
 
 	// Slave Selects
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ,
 		GPIO_CNF_OUTPUT_PUSHPULL, GPIO0 | GPIO1 | GPIO2 |GPIO3|GPIO4|GPIO5|GPIO6|GPIO7);
 }
 
