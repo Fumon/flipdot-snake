@@ -41,6 +41,8 @@ u8 flippedoff;
 void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
 void flip(u16 x, u16 y, u8 on);
 void flipsection(u8 hchip, u8 lchip);
+void stripes(u8);
+void spiral();
 
 u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
 u8 y_chips[] = {Y_A, Y_B, Y_C};
@@ -59,7 +61,6 @@ int main(void) {
 	// Raise chip enable
 	gpio_set(GPIOC, CH_EN);
 
-	u16 i, j;
 	int k;
 
 	buttonstate = 0;
@@ -81,6 +82,7 @@ int main(void) {
 			}
 		}
 
+		/*
 		// Else
 		for(i = 0; i < ynum; i++) {
 			for (j=0; j < xnum; j++)
@@ -88,6 +90,8 @@ int main(void) {
 				flip(j, i, flippedoff);
 			}
 		}
+		*/
+		stripes(flippedoff);
 		
 
 		flippedoff = !flippedoff;
@@ -162,6 +166,28 @@ void flip(u16 x, u16 y, u8 on) {
 	select(pinx|piny);
 	spi_xfer(SPI1, CL);
 	deselect(pinx|piny);
+}
+
+void stripes(u8 on) {
+	int k;
+	int space = 0;
+	space = 2;
+	int i;
+	u16 y,x;
+	for(y = 0; y < ynum; y++) {
+		i = (y%space);
+		for(x = 0; x < xnum; x++) {
+			if(!(i%space)) {
+				flip(x, y, on);
+			} else {
+				flip(x, y, !on);
+			}
+			for(k = 0; k < 50; k++) {
+				__asm__("nop");
+			}
+			i++;
+		}
+	}
 }
 
 void simpleflip(u8 hchip, u8 lchip, u16 hind, u16 lind) {
