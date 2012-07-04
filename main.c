@@ -40,9 +40,11 @@ u8 flippedoff;
 
 void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
 void flip(u16 x, u16 y, u8 on);
+void blank(u8 on);
 void flipsection(u8 hchip, u8 lchip);
+void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 );
 void stripes(u8);
-void spiral();
+void spiral(u8 cw);
 
 u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
 u8 y_chips[] = {Y_A, Y_B, Y_C};
@@ -84,14 +86,10 @@ int main(void) {
 
 		/*
 		// Else
-		for(i = 0; i < ynum; i++) {
-			for (j=0; j < xnum; j++)
-			{
-				flip(j, i, flippedoff);
-			}
-		}
+		
 		*/
-		stripes(flippedoff);
+		//stripes(flippedoff);
+		spiral(flippedoff);
 		
 
 		flippedoff = !flippedoff;
@@ -159,13 +157,144 @@ void flip(u16 x, u16 y, u8 on) {
 	spi_xfer(SPI1, ypack);
 	deselect(piny);
 
-	for(i = 0; i < 3000; i++) {
+	for(i = 0; i < 2000; i++) {
 		__asm__("nop");
 	}
 
 	select(pinx|piny);
 	spi_xfer(SPI1, CL);
 	deselect(pinx|piny);
+}
+
+void blank(u8 on) {
+	u16 i, j;
+	for(i = 0; i < ynum; i++) {
+		for (j=0; j < xnum; j++)
+		{
+			flip(j, i, on);
+		}
+	}
+}
+
+void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 ) {
+	int xdiff, ydiff, dirx, diry;
+	xdiff = (x2 - x1);
+	ydiff = (y2 - y1);
+	if(xdiff > 0) {
+		dirx = 1;
+	}else {
+		dirx = -1;
+		xdiff *= -1;
+	}
+	if(ydiff > 0) {
+		diry = 1;
+	} else {
+		diry = -1;
+		ydiff *= -1;
+	}
+	u16 i, j;
+
+	i = 0;
+	j = 0;
+	int k;
+	while(1) {
+		flip(x1 + (dirx * j), y1 + (diry * i), on);
+		if(i == ydiff && j == xdiff) {
+			break;
+		}
+		i++;
+		if(i > ydiff) { i = ydiff; }
+		j++;
+		if(j > xdiff) { j = xdiff; }
+		/*
+		for(k = 0; k < 300; k++) {
+			__asm__("nop");
+		}
+		*/
+	}
+}
+
+void spiral(u8 cw) {
+	//int spacebetween_ms = 0;
+	//int spacebetween_us = 4000;
+	int space = 0;
+
+	blank(0);
+	
+	int yma, xma, ymi, xmi;
+	yma = ynum - 1;
+	ymi = 0;
+	xma = xnum - 1;
+	xmi = 0;
+	
+	if(space == 0) {
+		space = 2;
+	}
+	
+	// ClockWise
+	// 0 - LL UL - ymi,xmi -> yma,xmi (xmi++)
+	// 1 - UL UR - yma,xmi -> yma,xma (yma--)
+	// 2 - UR LR - yma,xma -> ymi,xma (xma--)
+	// 3 - LR LL - ymi,xma -> ymi,xmi (ymi++)
+	// Anticlockwise
+	// 0 - LL LR - ymi,xmi -> ymi,xma (ymi++)
+	// 1 - LR UR - ymi,xma -> yma,xma (xma--)
+	// 2 - UR UL - yma,xma -> yma,xmi (yma--)
+	// 3 - UL LL - yma,xmi -> ymi,xmi (xmi++)
+	int stage = 0; 
+	
+	while(yma - ymi >= 0 && xma - xmi >= 0) {
+		if(cw) {
+			switch(stage % 4) {
+				case 0:
+				line(1,xmi,ymi,xmi,yma);
+				xmi++;
+				ymi += (space - 1);
+				break;
+				case 1:
+				line(1,xmi,yma,xma,yma);
+				yma--;
+				xmi += (space - 1);
+				break;
+				case 2:
+				line(1,xma,yma,xma,ymi);
+				xma--;
+				yma -= (space - 1);
+				break;
+				case 3:
+				line(1,xma,ymi,xmi,ymi);
+				ymi++;
+				xma -= (space -1);
+				break;
+			}
+		} else {
+			switch(stage % 4) {
+				case 0:
+				line(1,xmi,ymi,xma,ymi);
+				ymi++;
+				xmi += (space - 1);
+
+				break;
+				case 1:
+				line(1,xma,ymi,xma,yma);
+				xma--;
+				ymi += (space - 1);
+				break;
+				case 2:
+				line(1,xma,yma,xmi,yma);
+				yma--;
+				xma -= (space - 1);
+				break;
+				case 3:
+				line(1,xmi,yma,xmi,ymi);
+				xmi++;
+				yma -= (space - 1);
+				break;
+			}
+		}
+		stage++;
+	}
+	
 }
 
 void stripes(u8 on) {
