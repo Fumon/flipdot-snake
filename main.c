@@ -27,6 +27,15 @@ void spiral(u8 cw);
 u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
 u8 y_chips[] = {Y_A, Y_B, Y_C};
 
+#define TAILLENGTH 10
+struct point
+{
+	u16 x,y;
+};
+
+struct point tail[TAILLENGTH]  = { {0xFFFF, 0xFFFF} };
+u8 tailind;
+
 int main(void) {
 	init_clock();
 	init_gpio();
@@ -49,6 +58,7 @@ int main(void) {
 	ypos = 8;
 
 	direction = 0;
+	tailind= 0;
 
 	blank(0);
 
@@ -109,8 +119,11 @@ int main(void) {
 			}
 		}
 
-
+		tail[tailind].x = xpos;
+		tail[tailind].y = ypos;
+		tailind = ((tailind + 1 ) % TAILLENGTH);
 		flip(xpos, ypos, 1);
+		flip(tail[tailind].x, tail[tailind].y, 0);
 
 		for(k=0; k < 200000; k++) {
 			__asm__("nop");
