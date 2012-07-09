@@ -21,6 +21,8 @@ Flips one dot
 #define Y_B GPIO6
 #define Y_C GPIO7
 
+#define CH_EN GPIO12
+
 #define select(x) gpio_clear(GPIOC, x)
 #define deselect(x) gpio_set(GPIOC, x)
 
@@ -53,6 +55,9 @@ int main(void) {
 
 	// Raise selects
 	gpio_set(GPIOC, X_A|X_B|X_C|X_D|X_E|Y_A|Y_B|Y_C);
+
+	// Raise chip enable
+	gpio_set(GPIOC, CH_EN);
 
 	u16 i, j;
 	int k;
@@ -224,6 +229,10 @@ void init_gpio() {
 	// Slave Selects
 	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ,
 		GPIO_CNF_OUTPUT_PUSHPULL, GPIO0 | GPIO1 | GPIO2 |GPIO3|GPIO4|GPIO5|GPIO6|GPIO7);
+
+	// Chip Enable
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50MHZ,
+		GPIO_CNF_OUTPUT_PUSHPULL, CH_EN);
 }
 
 void init_spi() {
