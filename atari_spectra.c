@@ -6,12 +6,15 @@ void controller_init() {
 		STICK_RIGHT | STICK_LEFT | STICK_DOWN | STICK_UP | STICK_BUTTON);
 }
 
-u8 controller_state() {
-	u16 tmp = gpio_get(CONTROLLER_PORT_ATARI,
-		STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP | STICK_BUTTON);
+u16 controller_state() {
+	//u16 tmp = gpio_get(CONTROLLER_PORT_ATARI,
+	//	STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP);
 	// Gather
-	tmp = (tmp & (STICK_LEFT | STICK_RIGHT)) | 
-		(tmp >> 3);
+	//tmp = (tmp & (MASK_LEFT | MASK_RIGHT)) | 
+	//	(tmp >> 3);
+
+	u16 tmp = (GPIOB_IDR & (STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP));
+	//tmp = (tmp & (STICK_LEFT | STICK_RIGHT)) | ((tmp & (STICK_DOWN | STICK_UP)) >> 3);
 
 	return (u8)tmp;
 }

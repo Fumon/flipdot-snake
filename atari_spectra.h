@@ -10,7 +10,7 @@
 #ifdef CONTROLLER_ATARI_JOYSTICK
 void controller_init();
 
-u8 controller_state();
+u16 controller_state();
 
 #endif
 #endif

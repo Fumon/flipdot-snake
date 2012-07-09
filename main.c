@@ -13,7 +13,7 @@ void init_clock();
 void init_gpio();
 void init_spi();
 
-u8 direction, direction_buf;
+u16 direction, direction_buf;
 
 void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
 void flip(u16 x, u16 y, u8 on);
@@ -49,20 +49,70 @@ int main(void) {
 
 	direction = 0;
 
+	blank(0);
+
+	for(k=0; k < 50; k++) {
+		__asm__("nop");
+	}
+
+	flip(xpos, ypos, 1);
+
 	while(1) {
 		direction_buf = controller_state();
-		if(direction_buf) {
+		//if(direction_buf) {
 			// Prevents us from stopping
 			direction = direction_buf;
-		}
+		//}
 
 		if(!direction) {
+			gpio_clear(GPIOC, GPIO9|GPIO8);
 			// No movement
 			continue;
+		} else {
+			if(direction & MASK_LEFT) {
+				gpio_set(GPIOC, GPIO9);
+			}
+			if(direction & MASK_RIGHT) {
+				gpio_set(GPIOC, GPIO8);
+			}
 		}
 
+		switch(direction) {
+		case MASK_LEFT:
+			if(xpos == (xnum - 1)) {
+				xpos = 0;
+			} else {
+				xpos += 1;
+			}
+			break;
+		case MASK_RIGHT:
+			if(xpos == 0) {
+				xpos = xnum - 1;
+			} else {
+				xpos -= 1;
+			}
+			break;
+		case MASK_DOWN:
+			if(ypos == 0) {
+				ypos = ynum - 1;
+			} else {
+				ypos -= 1;
+			}
+			break;
+		case MASK_UP:
+			if(ypos == (ynum - 1)) {
+				ypos = 0;
+			} else {
+				ypos += 1;
+			}
+			break;
+		}
 
+		flip(xpos, ypos, 1);
 
+		for(k=0; k < 500; k++) {
+			__asm__("nop");
+		}
 	}
 }
 void flip(u16 x, u16 y, u8 on) {
