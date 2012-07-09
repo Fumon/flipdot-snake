@@ -27,7 +27,7 @@ void spiral(u8 cw);
 u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
 u8 y_chips[] = {Y_A, Y_B, Y_C};
 
-#define TAILLENGTH 10
+#define TAILLENGTH 24
 struct point
 {
 	u16 x,y;
@@ -66,10 +66,10 @@ int main(void) {
 
 	while(1) {
 		direction_buf = controller_state();
-		//if(direction_buf) {
+		if(direction_buf) {
 			// Prevents us from stopping
 			direction = direction_buf;
-		//}
+		}
 
 		if(!direction) {
 			gpio_clear(GPIOC, GPIO9|GPIO8);
@@ -125,7 +125,7 @@ int main(void) {
 		flip(xpos, ypos, 1);
 		flip(tail[tailind].x, tail[tailind].y, 0);
 
-		for(k=0; k < 200000; k++) {
+		for(k=0; k < 10000; k++) {
 			__asm__("nop");
 		}
 	}
