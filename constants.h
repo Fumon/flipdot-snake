@@ -1,5 +1,5 @@
 /*
- Constants and simple macros
+Constants and simple macros
 */
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
@@ -8,6 +8,7 @@
 #define L1 0x8002
 #define H1 0x8004
 
+//PORTC
 #define X_A GPIO0
 #define X_B GPIO1
 #define X_C GPIO2
@@ -19,6 +20,25 @@
 #define Y_C GPIO7
 
 #define CH_EN GPIO12
+ //END PORTC
+
+#define CONTROLLER_ATARI_JOYSTICK
+#ifdef CONTROLLER_ATARI_JOYSTICK
+//PORTB
+#define CONTROLLER_PORT_ATARI GPIOB
+#define STICK_LEFT GPIO0
+#define STICK_RIGHT GPIO1
+#define STICK_DOWN GPIO5
+#define STICK_UP GPIO6
+#define STICK_BUTTON GPIO7
+
+#define MASK_LEFT 0x1
+#define MASK_RIGHT 0x2
+#define MASK_DOWN 0x4
+#define MASK_UP 0x8
+#define MASK_BUTTON 0x10
+
+ #endif
 
 #define select(x) gpio_clear(GPIOC, x)
 #define deselect(x) gpio_set(GPIOC, x)

@@ -18,6 +18,7 @@
 ##
 
 BINARY = main
+OBJS = atari_spectra.o
 
 LDSCRIPT = ../stm32vl-discovery.ld
 

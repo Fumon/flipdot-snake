@@ -7,14 +7,13 @@ Flips one dot
 #include <libopencm3/stm32/spi.h>
 
 #include "constants.h"
+#include "atari_spectra.h"
 
 void init_clock();
 void init_gpio();
 void init_spi();
 
-u8 buttonstate;
-u8 buttonon;
-u8 flippedoff;
+u8 direction, direction_buf;
 
 void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
 void flip(u16 x, u16 y, u8 on);
@@ -31,6 +30,7 @@ int main(void) {
 	init_clock();
 	init_gpio();
 	init_spi();
+	controller_init();
 
 	// Turn the LED off.
 	gpio_clear(GPIOC, GPIO9|GPIO8);
@@ -41,46 +41,28 @@ int main(void) {
 	// Raise chip enable
 	gpio_set(GPIOC, CH_EN);
 
+	u16 xpos, ypos;
 	int k;
 
-	buttonstate = 0;
-	buttonon = 0;
-	flippedoff = 0;
-	
+	xpos = 14;
+	ypos = 8;
+
+	direction = 0;
+
 	while(1) {
-		buttonstate = ((GPIOA_IDR & 0x0001) != 0);
-		if(!buttonstate) {
-			if(buttonon) {
-				buttonon = 0;
-			}
+		direction_buf = controller_state();
+		if(direction_buf) {
+			// Prevents us from stopping
+			direction = direction_buf;
+		}
+
+		if(!direction) {
+			// No movement
 			continue;
-		} else {
-			if(buttonon) {
-				continue;
-			} else {
-				buttonon = 1;
-			}
 		}
 
-		/*
-		// Else
-		
-		*/
-		//stripes(flippedoff);
-		spiral(flippedoff);
-		
 
-		flippedoff = !flippedoff;
-		if(flippedoff) {
-			//LED on
-			gpio_set(GPIOC, GPIO9);
-		} else {
-			gpio_clear(GPIOC, GPIO9);
-		}
 
-		for(k = 0; k < 80000; k++) {
-			__asm__("nop");
-		}
 	}
 }
 void flip(u16 x, u16 y, u8 on) {
@@ -348,6 +330,7 @@ void init_gpio() {
 	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ,
 			  GPIO_CNF_OUTPUT_PUSHPULL, GPIO8);
 
+
 	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO0);
 
 
@@ -366,6 +349,11 @@ void init_gpio() {
 	// Chip Enable
 	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ,
 		GPIO_CNF_OUTPUT_PUSHPULL, CH_EN);
+
+#ifdef CONTROLLER_ATARI_JOYSTICK
+	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN,
+		STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP | STICK_BUTTON);
+#endif
 }
 
 void init_spi() {
