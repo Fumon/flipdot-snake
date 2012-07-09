@@ -196,7 +196,7 @@ void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 ) {
 
 	i = 0;
 	j = 0;
-	int k;
+	//int k;
 	while(1) {
 		flip(x1 + (dirx * j), y1 + (diry * i), on);
 		if(i == ydiff && j == xdiff) {
