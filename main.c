@@ -27,6 +27,8 @@ void spiral(u8 cw);
 u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
 u8 y_chips[] = {Y_A, Y_B, Y_C};
 
+#define SYM_SPACE 4
+
 #define TAILLENGTH 5
 struct point
 {
@@ -111,7 +113,15 @@ int main(void) {
 		tail[tailind].y = ypos;
 		tailind = ((tailind + 1 ) % TAILLENGTH);
 		flip(xpos, ypos, 1);
+		flip((xpos + SYM_SPACE) % xnum, (ypos + SYM_SPACE) % ynum, 1);
+		flip((xpos - SYM_SPACE) % xnum, (ypos - SYM_SPACE) % ynum, 1);
+		flip((xpos + SYM_SPACE) % xnum, (ypos - SYM_SPACE) % ynum, 1);
+		flip((xpos - SYM_SPACE) % xnum, (ypos + SYM_SPACE) % ynum, 1);
 		flip(tail[tailind].x, tail[tailind].y, 0);
+		flip((tail[tailind].x + SYM_SPACE) % xnum, (tail[tailind].y + SYM_SPACE) % ynum, 0);
+		flip((tail[tailind].x - SYM_SPACE) % xnum, (tail[tailind].y - SYM_SPACE) % ynum, 0);
+		flip((tail[tailind].x + SYM_SPACE) % xnum, (tail[tailind].y - SYM_SPACE) % ynum, 0);
+		flip((tail[tailind].x - SYM_SPACE) % xnum, (tail[tailind].y + SYM_SPACE) % ynum, 0);
 
 		for(k=0; k < 280000; k++) {
 			__asm__("nop");
