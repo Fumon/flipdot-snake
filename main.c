@@ -13,7 +13,7 @@ void init_clock();
 void init_gpio();
 void init_spi();
 
-u16 direction, direction_buf;
+u16 direction, direction_buf, direction_prev;
 u16 xpos, ypos;
 
 void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
@@ -65,6 +65,7 @@ int main(void) {
 	//flip(xpos, ypos, 1);
 
 	while(1) {
+		u8 noupdate = 0;
 		direction_buf = controller_state();
 		if(direction_buf) {
 			// Prevents us from stopping
@@ -80,31 +81,40 @@ int main(void) {
 				blank(0);
 				continue;
 			}
-			if(direction & STICK_LEFT) {
+			FIXTHING:
+			if(direction & STICK_LEFT && !(direction_prev & STICK_RIGHT)) {
 				if(xpos == 0) {
 					xpos = xnum - 1;
 				} else {
 					xpos -= 1;
 				}
-			} else if(direction & STICK_RIGHT) {
+			} else if(direction & STICK_RIGHT && !(direction_prev & STICK_LEFT)) {
 				if(xpos == (xnum - 1)) {
 					xpos = 0;
 				} else {
 					xpos += 1;
 				}
-			} else if(direction & STICK_DOWN) {
+			} else if(direction & STICK_DOWN && !(direction_prev & STICK_UP)) {
 				if(ypos == 0) {
 					ypos = ynum - 1;
 				} else {
 					ypos -= 1;
 				}
-			} else if(direction & STICK_UP) {
+			} else if(direction & STICK_UP && !(direction_prev & STICK_DOWN)) {
 				if(ypos == (ynum - 1)) {
 					ypos = 0;
 				} else {
 					ypos += 1;
 				}
+			} else {
+				direction = direction_prev;
+				noupdate = 1;
+				goto  FIXTHING;
 			}
+		}
+
+		if (!noupdate) {
+			direction_prev = direction;
 		}
 
 		tail[tailind].x = xpos;
