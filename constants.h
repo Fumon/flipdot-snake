@@ -26,17 +26,11 @@ Constants and simple macros
 #ifdef CONTROLLER_ATARI_JOYSTICK
 //PORTB
 #define CONTROLLER_PORT_ATARI GPIOB
-#define STICK_LEFT GPIO0
-#define STICK_RIGHT GPIO1
-#define STICK_DOWN GPIO5
-#define STICK_UP GPIO6
-#define STICK_BUTTON GPIO7
-
-#define MASK_LEFT 0x1
-#define MASK_RIGHT 0x2
-#define MASK_DOWN 0x4
-#define MASK_UP 0x8
-#define MASK_BUTTON 0x10
+#define STICK_RIGHT GPIO0
+#define STICK_LEFT GPIO1
+#define STICK_DOWN GPIO8
+#define STICK_UP GPIO7
+#define STICK_BUTTON GPIO9
 
  #endif
 

@@ -14,7 +14,6 @@ u16 controller_state() {
 	//	(tmp >> 3);
 
 	u16 tmp = (GPIOB_IDR & (STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP));
-	//tmp = (tmp & (STICK_LEFT | STICK_RIGHT)) | ((tmp & (STICK_DOWN | STICK_UP)) >> 3);
 
-	return (u8)tmp;
+	return tmp;
 }
