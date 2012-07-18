@@ -52,8 +52,6 @@ int main(void) {
 	gpio_set(GPIOC, CH_EN);
 
 	
-	int k;
-
 	xpos = 14;
 	ypos = 8;
 
@@ -62,7 +60,7 @@ int main(void) {
 
 	blank(0);
 
-	//flip(xpos, ypos, 1);
+	u32 cnt = 0;
 
 	while(1) {
 		direction_buf = controller_state();
@@ -70,9 +68,15 @@ int main(void) {
 			// Prevents us from stopping
 			direction = direction_buf;
 		}
+		cnt++;
+
+		if(cnt < 88000) {
+			continue;
+		} else {
+			cnt = 0;
+		}
 
 		if(!direction) {
-			gpio_clear(GPIOC, GPIO9|GPIO8);
 			// No movement
 			continue;
 		} else {
@@ -113,9 +117,7 @@ int main(void) {
 		flip(xpos, ypos, 1);
 		flip(tail[tailind].x, tail[tailind].y, 0);
 
-		for(k=0; k < 280000; k++) {
-			__asm__("nop");
-		}
+		
 	}
 }
 
