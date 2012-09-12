@@ -5,9 +5,19 @@ Flips one dot
 #include <libopencm3/stm32/f1/rcc.h>
 #include <libopencm3/stm32/f1/gpio.h>
 #include <libopencm3/stm32/spi.h>
+#include <libopencm3/stm32/systick.h>
+
+#include <string.h>
+#include <stdlib.h>
 
 #include "constants.h"
 #include "atari_spectra.h"
+#include "ringlib.h"
+
+struct point
+{
+	u16 x,y;
+};
 
 void init_clock();
 void init_gpio();
@@ -24,19 +34,27 @@ void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 );
 void stripes(u8);
 void spiral(u8 cw);
 
-u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
-u8 y_chips[] = {Y_A, Y_B, Y_C};
+int check_point(ring* r, struct point* testpoint);
 
-#define TAILLENGTH 5
-struct point
-{
-	u16 x,y;
+struct point snakemem[(xnum) * (ynum)];
+
+ring snakebase = {
+	.memstore = snakemem,
+	.nelem = (xnum * ynum),
+	.head = 0,
+	.tail = 0,
+	.unitsize = sizeof(struct point),
+	.current_element_count = 0,
 };
 
-struct point tail[TAILLENGTH]  = { {0xFFFF, 0xFFFF} };
-u8 tailind;
+struct point food;
 
 int main(void) {
+	int i;
+	ring *snake = &snakebase;
+	struct point staging_point = {99, 99};
+	struct point* poppoint = NULL;
+
 	init_clock();
 	init_gpio();
 	init_spi();
@@ -51,18 +69,40 @@ int main(void) {
 	// Raise chip enable
 	gpio_set(GPIOC, CH_EN);
 
+	RESET:
+
+	memset(snakemem, 0x00, (sizeof(struct point) * xnum * ynum));
+	snake->head = 0;
+	snake->tail = 0;
+	snake->current_element_count = 0;
+
+	food.x = 99;
+	food.y = 99;
+
+	blank(1);
+
+	for(i = 0; i < 200000; i++) {
+		__asm__("nop");
+	}
 	
 	xpos = 14;
 	ypos = 8;
 
 	direction = 0;
-	tailind= 0;
 
 	blank(0);
 
 	u32 cnt = 0;
 
 	while(1) {
+		// Generate food check
+		if(food.x == 99) {
+			do {
+				food.x = rand() % xnum;
+				food.y = rand() % ynum;
+			} while(check_point(snake, &food));
+		}
+
 		direction_buf = controller_state();
 		if(direction_buf) {
 			// Prevents us from stopping
@@ -77,6 +117,7 @@ int main(void) {
 		}
 
 		if(!direction) {
+			srand(systick_get_value());
 			// No movement
 			continue;
 		} else {
@@ -111,14 +152,41 @@ int main(void) {
 			}
 		}
 
-		tail[tailind].x = xpos;
-		tail[tailind].y = ypos;
-		tailind = ((tailind + 1 ) % TAILLENGTH);
-		flip(xpos, ypos, 1);
-		flip(tail[tailind].x, tail[tailind].y, 0);
+		// Staging point
+		staging_point.x = xpos;
+		staging_point.y = ypos;
 
-		
+		if(check_point(snake, &staging_point)) {
+			// GAME OVER
+			goto RESET;
+		}
+
+		// Check Food collision
+		if (staging_point.x == food.x && staging_point.y == food.y) {
+			food.x = 99;
+			food.y = 99;
+		} else {
+			pop(snake, (void**)&poppoint);
+			flip(poppoint->x, poppoint->y, 0);
+		}
+
+		push(snake, &staging_point);
+		flip(xpos, ypos, 1);
 	}
+}
+
+int check_point(ring* r, struct point* testpoint) {
+	struct point* tmppoint = NULL;
+	// Check for tail collision
+	int i;
+	for (i = 0; i < r->current_element_count; ++i) {
+		get(r, i, (void**)&tmppoint);
+		if(testpoint->x == tmppoint->x 
+			&& testpoint->y == tmppoint->y) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void flip(u16 x, u16 y, u8 on) {
