@@ -8,7 +8,7 @@ Flips one dot
 #include <libopencm3/stm32/systick.h>
 
 #include <string.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #include "constants.h"
 #include "atari_spectra.h"
@@ -71,7 +71,7 @@ int main(void) {
 
 	RESET:
 
-	memset(snakemem, 0x00, (sizeof(struct point) * xnum * ynum));
+	//memset(snakemem, 0x00, (sizeof(struct point) * xnum * ynum));
 	snake->head = 0;
 	snake->tail = 0;
 	snake->current_element_count = 0;
@@ -81,7 +81,7 @@ int main(void) {
 
 	blank(1);
 
-	for(i = 0; i < 200000; i++) {
+	for(i = 0; i < 2000; i++) {
 		__asm__("nop");
 	}
 	

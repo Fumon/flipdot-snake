@@ -17,7 +17,7 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-export PATH=$PATH:/home/fumon/dk/stm32/toolchain/sat/bin
+export PATH := $(PATH):/home/fumon/dk/stm32/toolchain/sat/bin
 
 BINARY = main
 OBJS = atari_spectra.o ringlib.o
