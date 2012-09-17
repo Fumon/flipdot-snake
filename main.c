@@ -158,11 +158,12 @@ void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 ) {
 		if(i > ydiff) { i = ydiff; }
 		j++;
 		if(j > xdiff) { j = xdiff; }
-		/*
-		for(k = 0; k < 300; k++) {
+		int k;
+		
+		for(k = 0; k < 30000; k++) {
 			__asm__("nop");
 		}
-		*/
+		
 	}
 }
 
@@ -180,7 +181,7 @@ void spiral(u8 cw) {
 	xmi = 0;
 	
 	if(space == 0) {
-		space = 2;
+		space = 1;
 	}
 	
 	// ClockWise
