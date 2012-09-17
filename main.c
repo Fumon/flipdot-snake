@@ -83,36 +83,12 @@ int main(void) {
 }
 void flip(u16 x, u16 y, u8 on) {
 	int i;
-	u32 pinx, piny;
-	if(x < 6) {
-		pinx = X_A;
-	} else if(x >= 6 && x < 12) {
-		pinx = X_B;
-		x -= 6;
-	} else if(x >= 12 && x < 18) {
-		pinx = X_C;
-		x -= 12;
-	} else if(x >= 18 && x < 24) {
-		pinx = X_D;
-		x -= 18;
-	} else if(x >= 24 && x < xnum) {
-		pinx = X_E;
-		x -= 24;
-	} else {
-		return;
-	}
-  
-	if(y < 6) {
-		piny = Y_A;
-	} else if(y > 5 && y < 12) {
-		piny = Y_B;
-		y -= 6;
-	} else if(y >= 12 && y < 16) {
-		piny = Y_C;
-		y -= 12;
-	} else {
-		return;
-	}
+	u16 pinx, piny;
+	pinx = x_chips[x_map[x]];
+	piny = y_chips[y_map[y]];
+
+	x += x_diff[x];
+	y += y_diff[y];
   
 	u16 xpack, ypack;
 	ypack = xpack = CL;
