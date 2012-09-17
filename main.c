@@ -26,10 +26,8 @@ void init_spi();
 u16 direction, direction_buf;
 u16 xpos, ypos;
 
-void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
 void flip(u16 x, u16 y, u8 on);
 void blank(u8 on);
-void flipsection(u8 hchip, u8 lchip);
 void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 );
 void stripes(u8);
 void spiral(u8 cw);
@@ -191,36 +189,12 @@ int check_point(ring* r, struct point* testpoint) {
 
 void flip(u16 x, u16 y, u8 on) {
 	int i;
-	u32 pinx, piny;
-	if(x < 6) {
-		pinx = X_A;
-	} else if(x >= 6 && x < 12) {
-		pinx = X_B;
-		x -= 6;
-	} else if(x >= 12 && x < 18) {
-		pinx = X_C;
-		x -= 12;
-	} else if(x >= 18 && x < 24) {
-		pinx = X_D;
-		x -= 18;
-	} else if(x >= 24 && x < xnum) {
-		pinx = X_E;
-		x -= 24;
-	} else {
-		return;
-	}
-  
-	if(y < 6) {
-		piny = Y_A;
-	} else if(y > 5 && y < 12) {
-		piny = Y_B;
-		y -= 6;
-	} else if(y >= 12 && y < 16) {
-		piny = Y_C;
-		y -= 12;
-	} else {
-		return;
-	}
+	u16 pinx, piny;
+	pinx = x_chips[x_map[x]];
+	piny = y_chips[y_map[y]];
+
+	x += x_diff[x];
+	y += y_diff[y];
   
 	u16 xpack, ypack;
 	ypack = xpack = CL;
@@ -290,11 +264,12 @@ void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 ) {
 		if(i > ydiff) { i = ydiff; }
 		j++;
 		if(j > xdiff) { j = xdiff; }
-		/*
-		for(k = 0; k < 300; k++) {
+		int k;
+		
+		for(k = 0; k < 30000; k++) {
 			__asm__("nop");
 		}
-		*/
+		
 	}
 }
 
@@ -312,7 +287,7 @@ void spiral(u8 cw) {
 	xmi = 0;
 	
 	if(space == 0) {
-		space = 2;
+		space = 1;
 	}
 	
 	// ClockWise
@@ -403,35 +378,6 @@ void stripes(u8 on) {
 	}
 }
 
-void simpleflip(u8 hchip, u8 lchip, u16 hind, u16 lind) {
-	int i;
-	gpio_clear(GPIOB, hchip);
-	spi_xfer(SPI1, (0x0004 << (hind * 2)) | CL);
-	gpio_set(GPIOB, hchip);
-	gpio_clear(GPIOB, lchip);
-	spi_xfer(SPI1, (0x0002 << (lind * 2)) | CL);
-	gpio_set(GPIOB, lchip);
-	for(i = 0; i < 3000; i++) {
-		__asm__("nop");
-	}
-	gpio_clear(GPIOB, hchip | lchip );
-	spi_xfer(SPI1, CL);
-	gpio_set(GPIOB, hchip | lchip);
-}
-
-void flipsection(u8 hchip, u8 lchip) {
-	u16 i, j;
-	int k;
-	for(i = 0; i < 6; i++) {
-		for(j = 0; j < 6; j++) {
-			simpleflip(hchip, lchip, j, i);
-			for(k = 0; k < 50; k++) {
-				__asm__("nop");
-			}
-		}
-	}
-}
-
 void init_clock() {
 	rcc_clock_setup_in_hse_8mhz_out_24mhz();
 
@@ -482,7 +428,7 @@ void init_gpio() {
 
 void init_spi() {
 	spi_init_master(SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_32, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
-		SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_16BIT,
+		SPI_CR1_CPHA, SPI_CR1_DFF_16BIT,
 		SPI_CR1_LSBFIRST);
 	spi_enable_software_slave_management(SPI1);
 	spi_disable_ss_output(SPI1);

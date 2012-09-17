@@ -1,8 +1,15 @@
 /*
+<<<<<<< HEAD
 Constants and simple macros
+=======
+ Constants and simple macros
+>>>>>>> lookup2
 */
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
+
+#include <libopencm3/stm32/f1/gpio.h>
+#include <libopencm3/stm32/f1/rcc.h>
 
 #define CL 0x8000
 #define L1 0x8002
@@ -40,4 +47,16 @@ Constants and simple macros
 #define xnum 28
 #define ynum 16
 
+extern u8 x_chips[];
+extern u8 y_chips[];
+
+extern u8 y_map[];
+
+extern s16 y_diff[];
+
+extern u8 x_map[];
+
+extern s16 x_diff[];
+
 #endif
+

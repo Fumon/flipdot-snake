@@ -22,6 +22,7 @@ export PATH := $(PATH):/home/fumon/dk/stm32/toolchain/sat/bin
 BINARY = main
 OBJS = atari_spectra.o ringlib.o
 
+OBJS += constants.o
 LDSCRIPT = ../stm32vl-discovery.ld
 
 include ../Makefile.include
