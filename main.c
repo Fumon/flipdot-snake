@@ -414,7 +414,7 @@ void init_gpio() {
 
 void init_spi() {
 	spi_init_master(SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_32, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
-		SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_16BIT,
+		SPI_CR1_CPHA, SPI_CR1_DFF_16BIT,
 		SPI_CR1_LSBFIRST);
 	spi_enable_software_slave_management(SPI1);
 	spi_disable_ss_output(SPI1);
