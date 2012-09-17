@@ -50,7 +50,6 @@ struct point food;
 int main(void) {
 	int i;
 	ring *snake = &snakebase;
-	struct point staging_point = {99, 99};
 	struct point* poppoint = NULL;
 
 	init_clock();
@@ -58,6 +57,9 @@ int main(void) {
 	init_spi();
 	controller_init();
 
+	struct point staging_point;
+	staging_point.x = 99;
+	staging_point.y = 99;
 	// Turn the LED off.
 	gpio_clear(GPIOC, GPIO9|GPIO8);
 
