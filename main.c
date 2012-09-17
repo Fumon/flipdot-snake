@@ -97,30 +97,28 @@ int main(void) {
 void checkchip(char on) {
 	int k;
 	u16 i, j;
-	for(i = 0; i < 7; i++) {
-		for (j = 0; j < 7; j++)
+	for(i = 0; i < 1; i++) {
+		for (j = 0; j < 6; j++)
 		{
 			u16 xpack;
 			u16 ypack;
-			ypack = CL;
-			xpack = CL;
+			ypack = 0x8000;
+			xpack = 0x8000;
+			
 			if(on) {
-				xpack |= 0x2 << (j * 2);
-				ypack |= 0x4 << (i * 2);
+				xpack |= (0x2 << (j * 2));
+				ypack |= (0x4 << (i * 2));
 			} 
 			else {
-				xpack |= 0x4 << (j * 2);
-				ypack |= 0x2 << (i * 2);
+				xpack |= (0x4 << (j * 2));
+				ypack |= (0x2 << (i * 2));
 			}
+			
 
 			select(X_A);
 			spi_xfer(SPI1, xpack);
 			deselect(X_A);
 
-			for(k = 0; k < 200; k++) {
-				__asm__("nop");
-			}
-		  
 			select(Y_B);
 			spi_xfer(SPI1, ypack);
 			deselect(Y_B);
@@ -134,13 +132,12 @@ void checkchip(char on) {
 			spi_xfer(SPI1, CL);
 			deselect(Y_B|X_A);
 
-			for(k = 0; k < 2000000; k++) {
+			for (k = 0; k < 200; ++k)
+			{
 				__asm__("nop");
 			}
 		}
-		for(k=0; k < 2000000; k++) {
-			__asm__("nop");
-		}
+
 	}
 
 
@@ -181,20 +178,20 @@ void flip(u16 x, u16 y, u8 on) {
 	u16 xpack, ypack;
 	ypack = xpack = CL;
 	if(on) {
-		xpack |= 0x2 << (x * 2);
-		ypack |= 0x4 << (y * 2);
+		xpack |= (0x2 << (x * 2));
+		ypack |= (0x4 << (y * 2));
 	} 
 	else {
-		xpack |= 0x4 << (x * 2);
-		ypack |= 0x2 << (y * 2);
+		xpack |= (0x4 << (x * 2));
+		ypack |= (0x2 << (y * 2));
 	}
   
 	select(pinx);
-	spi_xfer(SPI1, xpack);
+	spi_write(SPI1, xpack);
 	deselect(pinx);
   
 	select(piny);
-	spi_xfer(SPI1, ypack);
+	spi_write(SPI1, ypack);
 	deselect(piny);
 
 	int i;
@@ -204,7 +201,7 @@ void flip(u16 x, u16 y, u8 on) {
 
 
 	select(pinx|piny);
-	spi_xfer(SPI1, CL);
+	spi_write(SPI1, CL);
 	deselect(pinx|piny);
 }
 
@@ -261,10 +258,10 @@ void init_gpio() {
 }
 
 void init_spi() {
-	spi_init_master(SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_32, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
-		SPI_CR1_CPHA_CLK_TRANSITION_1, SPI_CR1_DFF_16BIT,
+	spi_init_master(SPI1, SPI_CR1_BAUDRATE_FPCLK_DIV_8, SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+		SPI_CR1_CPHA, SPI_CR1_DFF_16BIT,
 		SPI_CR1_LSBFIRST);
-	spi_enable_software_slave_management(SPI1);
+	spi_disable_software_slave_management(SPI1);
 	spi_disable_ss_output(SPI1);
 	spi_set_nss_high(SPI1);
 	//spi_set_bidirectional_transmit_only_mode(SPI1);
