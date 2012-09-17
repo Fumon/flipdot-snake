@@ -26,6 +26,10 @@
 #define xnum 28
 #define ynum 16
 
+
+u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
+u8 y_chips[] = {Y_A, Y_B, Y_C};
+
  u8 y_map[] = {\
 	2, //3 0
 	0, //0 1

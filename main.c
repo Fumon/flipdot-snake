@@ -22,9 +22,6 @@ void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 );
 void stripes(u8);
 void spiral(u8 cw);
 
-u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
-u8 y_chips[] = {Y_A, Y_B, Y_C};
-
 int main(void) {
 	init_clock();
 	init_gpio();
