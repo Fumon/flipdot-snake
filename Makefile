@@ -19,6 +19,7 @@
 
 BINARY = main
 
+OBJS += constants.o
 LDSCRIPT = ../stm32vl-discovery.ld
 
 include ../Makefile.include
