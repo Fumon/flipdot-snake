@@ -100,8 +100,10 @@ void checkchip(char on) {
 	for(i = 0; i < 7; i++) {
 		for (j = 0; j < 7; j++)
 		{
-			u16 xpack, ypack;
-			ypack = xpack = CL;
+			u16 xpack;
+			u16 ypack;
+			ypack = CL;
+			xpack = CL;
 			if(on) {
 				xpack |= 0x2 << (j * 2);
 				ypack |= 0x4 << (i * 2);
@@ -114,6 +116,10 @@ void checkchip(char on) {
 			select(X_A);
 			spi_xfer(SPI1, xpack);
 			deselect(X_A);
+
+			for(k = 0; k < 200; k++) {
+				__asm__("nop");
+			}
 		  
 			select(Y_B);
 			spi_xfer(SPI1, ypack);
@@ -127,6 +133,10 @@ void checkchip(char on) {
 			select(Y_B|X_A);
 			spi_xfer(SPI1, CL);
 			deselect(Y_B|X_A);
+
+			for(k = 0; k < 2000000; k++) {
+				__asm__("nop");
+			}
 		}
 		for(k=0; k < 2000000; k++) {
 			__asm__("nop");
