@@ -38,16 +38,9 @@ u8 buttonstate;
 u8 buttonon;
 u8 flippedoff;
 
-void simpleflip(u8 hchip, u8 lchip, u16 x, u16 y);
+void checkchip(char on);
 void flip(u16 x, u16 y, u8 on);
 void blank(u8 on);
-void flipsection(u8 hchip, u8 lchip);
-void line(u8 on, u16 x1, u16 y1, u16 x2, u16 y2 );
-void stripes(u8);
-void spiral(u8 cw);
-
-u8 x_chips[] = {X_A, X_B, X_C, X_D, X_E};
-u8 y_chips[] = {Y_A, Y_B, Y_C};
 
 int main(void) {
 	init_clock();
@@ -83,7 +76,8 @@ int main(void) {
 				buttonon = 1;
 			}
 		}
-    blank(flippedoff);
+
+		checkchip(flippedoff);
 		
 
 		flippedoff = !flippedoff;
@@ -99,6 +93,49 @@ int main(void) {
 		}
 	}
 }
+
+void checkchip(char on) {
+	int k;
+	u16 i, j;
+	for(i = 0; i < 7; i++) {
+		for (j = 0; j < 7; j++)
+		{
+			u16 xpack, ypack;
+			ypack = xpack = CL;
+			if(on) {
+				xpack |= 0x2 << (j * 2);
+				ypack |= 0x4 << (i * 2);
+			} 
+			else {
+				xpack |= 0x4 << (j * 2);
+				ypack |= 0x2 << (i * 2);
+			}
+
+			select(X_A);
+			spi_xfer(SPI1, xpack);
+			deselect(X_A);
+		  
+			select(Y_B);
+			spi_xfer(SPI1, ypack);
+			deselect(Y_B);
+
+			
+			for(k = 0; k < 2000; k++) {
+				__asm__("nop");
+			}
+
+			select(Y_B|X_A);
+			spi_xfer(SPI1, CL);
+			deselect(Y_B|X_A);
+		}
+		for(k=0; k < 2000000; k++) {
+			__asm__("nop");
+		}
+	}
+
+
+}
+
 void flip(u16 x, u16 y, u8 on) {
 	u32 pinx, piny;
 	if(x < 6) {
@@ -169,23 +206,6 @@ void blank(u8 on) {
 			flip(j, i, on);
 		}
 	}
-}
-
-
-void simpleflip(u8 hchip, u8 lchip, u16 hind, u16 lind) {
-	int i;
-	gpio_clear(GPIOB, hchip);
-	spi_xfer(SPI1, (0x0004 << (hind * 2)) | CL);
-	gpio_set(GPIOB, hchip);
-	gpio_clear(GPIOB, lchip);
-	spi_xfer(SPI1, (0x0002 << (lind * 2)) | CL);
-	gpio_set(GPIOB, lchip);
-	for(i = 0; i < 3000; i++) {
-		__asm__("nop");
-	}
-	gpio_clear(GPIOB, hchip | lchip );
-	spi_xfer(SPI1, CL);
-	gpio_set(GPIOB, hchip | lchip);
 }
 
 void init_clock() {
