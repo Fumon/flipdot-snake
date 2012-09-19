@@ -7,7 +7,7 @@ Flips one dot
 #include <libopencm3/stm32/spi.h>
 #include <libopencm3/stm32/systick.h>
 
-#include <string.h>
+#include "simplerand.h"
 //#include <stdlib.h>
 
 #include "constants.h"
@@ -48,7 +48,6 @@ ring snakebase = {
 struct point food;
 
 int main(void) {
-	int i;
 	ring *snake = &snakebase;
 	struct point* poppoint = NULL;
 
@@ -58,8 +57,6 @@ int main(void) {
 	controller_init();
 
 	struct point staging_point;
-	staging_point.x = 99;
-	staging_point.y = 99;
 	// Turn the LED off.
 	gpio_clear(GPIOC, GPIO9|GPIO8);
 
@@ -81,12 +78,21 @@ int main(void) {
 
 	blank(1);
 
-	for(i = 0; i < 2000; i++) {
+	while(controller_state() != STICK_BUTTON) {
 		__asm__("nop");
 	}
+
+	srsrand(systick_get_value());
+
 	
 	xpos = 14;
 	ypos = 8;
+
+	staging_point.x = xpos;
+	staging_point.y = ypos;
+
+	push(snake, &staging_point);
+	flip(xpos, ypos, 1);
 
 	direction = 0;
 
@@ -98,9 +104,10 @@ int main(void) {
 		// Generate food check
 		if(food.x == 99) {
 			do {
-				food.x = rand() % xnum;
-				food.y = rand() % ynum;
+				food.x = srrand() % xnum;
+				food.y = srrand() % ynum;
 			} while(check_point(snake, &food));
+			flip(food.x, food.y, 1);
 		}
 
 		direction_buf = controller_state();
@@ -117,7 +124,7 @@ int main(void) {
 		}
 
 		if(!direction) {
-			srand(systick_get_value());
+			srsrand(systick_get_value());
 			// No movement
 			continue;
 		} else {
