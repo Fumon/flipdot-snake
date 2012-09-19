@@ -121,14 +121,14 @@ int main(void) {
 			}
 			continue;
 		}
-		if(cnt < 44000) {
+		if(cnt < 4000) {
 			continue;
 		} else {
 			cnt = 0;
 		}
 
 		foodflipcnt++;
-		if (foodflipcnt > 4000)
+		if (foodflipcnt > 400000)
 		{
 			flip(food.x, food.y, 1);
 		}
