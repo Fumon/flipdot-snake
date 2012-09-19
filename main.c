@@ -23,6 +23,7 @@ struct point
 void init_clock();
 void init_gpio();
 void init_spi();
+void systick_init();
 
 u16 direction, direction_buf;
 u16 xpos, ypos;
@@ -56,6 +57,7 @@ int main(void) {
 	init_gpio();
 	init_spi();
 	controller_init();
+	systick_init();
 
 	struct point staging_point;
 	// Turn the LED off.
@@ -445,4 +447,10 @@ void init_spi() {
 	spi_set_nss_high(SPI1);
 	//spi_set_bidirectional_transmit_only_mode(SPI1);
 	spi_enable(SPI1);
+}
+
+void systick_init() {
+	systick_set_clocksource(STK_CTRL_CLKSOURCE_AHB_DIV8);
+	systick_set_reload(9000);
+	systick_counter_enable();
 }
