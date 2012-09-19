@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "fumem.h"
 
 typedef struct {
 	void* memstore;

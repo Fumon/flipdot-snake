@@ -58,5 +58,7 @@ extern u8 x_map[];
 
 extern s16 x_diff[];
 
+
+
 #endif
 

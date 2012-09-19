@@ -9,7 +9,7 @@ int push(ring *r, void* newelement) {
 	r->current_element_count = r->current_element_count + 1;
 	r->head = r->head + 1;
 
-	memcpy(getaddress(r, 0), newelement, r->unitsize);
+	fumemcpy(getaddress(r, 0), newelement, r->unitsize);
 
 	return 0;
 }

@@ -13,6 +13,7 @@ Flips one dot
 #include "constants.h"
 #include "atari_spectra.h"
 #include "ringlib.h"
+#include "fumem.h"
 
 struct point
 {
@@ -68,7 +69,7 @@ int main(void) {
 
 	RESET:
 
-	//memset(snakemem, 0x00, (sizeof(struct point) * xnum * ynum));
+	fumemclear(snakemem, (sizeof(struct point) * xnum * ynum));
 	snake->head = 0;
 	snake->tail = 0;
 	snake->current_element_count = 0;

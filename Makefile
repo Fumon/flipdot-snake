@@ -20,9 +20,8 @@
 #PATH := $(PATH):/home/fumon/dk/stm32/toolchain/sat/bin
 
 BINARY = main
-OBJS = atari_spectra.o ringlib.o simplerand.o
 
-OBJS += constants.o
+OBJS += fumem.o constants.o atari_spectra.o ringlib.o  simplerand.o
 LDSCRIPT = ../stm32vl-discovery.ld
 
 include ../Makefile.include
