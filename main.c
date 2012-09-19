@@ -87,6 +87,7 @@ int main(void) {
 
 	srsrand(systick_get_value());
 
+	blank(0);
 	
 	xpos = 14;
 	ypos = 8;
@@ -99,17 +100,36 @@ int main(void) {
 
 	direction = 0;
 
-	blank(0);
 
 	u32 cnt = 0;
+	u32 foodflipcnt = 0;
 
 	while(1) {
-		// Generate food check
-		if(food.x == 99) {
-			do {
-				food.x = srrand() % xnum;
-				food.y = srrand() % ynum;
-			} while(check_point(snake, &food));
+		
+
+		
+		cnt++;
+		if (cnt == 2000)
+		{
+			// Generate food check
+			if(food.x == 99) {
+				do {
+					food.x = srrand() % xnum;
+					food.y = srrand() % ynum;
+				} while(check_point(snake, &food));
+				flip(food.x, food.y, 1);
+			}
+			continue;
+		}
+		if(cnt < 44000) {
+			continue;
+		} else {
+			cnt = 0;
+		}
+
+		foodflipcnt++;
+		if (foodflipcnt > 4000)
+		{
 			flip(food.x, food.y, 1);
 		}
 
@@ -120,13 +140,6 @@ int main(void) {
 			// Prevents us from stopping
 			direction = direction_buf;
 		}
-		cnt++;
-
-		if(cnt < 88000) {
-			continue;
-		} else {
-			cnt = 0;
-		}
 
 		if(!direction) {
 			srsrand(systick_get_value());
@@ -135,6 +148,7 @@ int main(void) {
 		} else {
 			if(direction & STICK_BUTTON) {
 				blank(0);
+				goto RESET;
 				continue;
 			}
 			if(direction & STICK_LEFT) {
@@ -170,6 +184,7 @@ int main(void) {
 
 		if(check_point(snake, &staging_point)) {
 			// GAME OVER
+			__asm__("nop");
 			goto RESET;
 		}
 
@@ -190,9 +205,16 @@ int main(void) {
 int check_point(ring* r, struct point* testpoint) {
 	struct point* tmppoint = NULL;
 	// Check for tail collision
-	int i;
+	int i = 0;
 	for (i = 0; i < r->current_element_count; ++i) {
-		get(r, i, (void**)&tmppoint);
+		int ret = get(r, i, (void**)&tmppoint);
+		if(ret == 1) {
+			// Indexing error
+			exit(1);
+		} else if ((void*)tmppoint < (void*)snakemem && (void*)tmppoint > ((void*)snakemem + (sizeof(struct point) * xnum * ynum))) {
+			// Get address error
+			exit(1);
+		}
 		if(testpoint->x == tmppoint->x 
 			&& testpoint->y == tmppoint->y) {
 			return 1;
@@ -453,6 +475,6 @@ void init_spi() {
 
 void systick_init() {
 	systick_set_clocksource(STK_CTRL_CLKSOURCE_AHB_DIV8);
-	systick_set_reload(9000);
+	systick_set_reload(90);
 	systick_counter_enable();
 }

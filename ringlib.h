@@ -10,7 +10,7 @@ typedef struct {
 	int nelem;
 	int head;
 	int tail;
-	unsigned int unitsize;
+	int unitsize;
 	int current_element_count;
 } ring;
 
