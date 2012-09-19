@@ -39,6 +39,11 @@ Constants and simple macros
 #define STICK_UP GPIO7
 #define STICK_BUTTON GPIO9
 
+#define STICK_RIGHT_OP STICK_LEFT
+#define STICK_LEFT_OP STICK_RIGHT
+#define STICK_DOWN_OP STICK_UP
+#define STICK_UP_OP STICK_DOWN
+
  #endif
 
 #define select(x) gpio_clear(GPIOC, x)

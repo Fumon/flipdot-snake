@@ -12,5 +12,7 @@ void controller_init();
 
 u16 controller_state();
 
+char detect_opposite(u16 cur, u16 new);
+
 #endif
 #endif

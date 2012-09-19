@@ -114,7 +114,9 @@ int main(void) {
 		}
 
 		direction_buf = controller_state();
-		if(direction_buf) {
+		if(direction_buf == STICK_BUTTON) {
+			goto RESET;
+		} else if(direction_buf && !detect_opposite(direction, direction_buf)) {
 			// Prevents us from stopping
 			direction = direction_buf;
 		}
