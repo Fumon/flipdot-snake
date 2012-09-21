@@ -8,6 +8,9 @@ int push(ring *r, void* newelement) {
 	}
 	r->current_element_count = r->current_element_count + 1;
 	r->head = r->head + 1;
+	if (r->head >= r->nelem) {
+		r->head = 0;
+	}
 
 	fumemcpy(getaddress(r, 0), newelement, r->unitsize);
 
