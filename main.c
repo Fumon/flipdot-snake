@@ -129,8 +129,10 @@ int main(void) {
 		}
 
 		direction_buf = controller_state();
-		if(direction_buf == STICK_BUTTON) {
+		if(direction_buf & STICK_BUTTON) {
 			goto RESET;
+		} else if(direction_buf == 0x00) {
+			direction = direction;
 		} else if(direction_buf && !detect_opposite(direction, direction_buf)) {
 			// Prevents us from stopping
 			direction = direction_buf;
@@ -176,7 +178,7 @@ int main(void) {
 		// Staging point
 		staging_point.x = xpos;
 		staging_point.y = ypos;
-
+		
 		if(check_point(snake, &staging_point)) {
 			// GAME OVER
 			__asm__("nop");

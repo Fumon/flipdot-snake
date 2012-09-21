@@ -33,7 +33,7 @@ u16 controller_state() {
 	//tmp = (tmp & (MASK_LEFT | MASK_RIGHT)) | 
 	//	(tmp >> 3);
 
-	u16 tmp = (GPIOB_IDR & (STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP | STICK_BUTTON));
+	u16 tmp = ((~GPIOB_IDR) & (STICK_LEFT | STICK_RIGHT | STICK_DOWN | STICK_UP | STICK_BUTTON));
 
 	return tmp;
 }
