@@ -81,7 +81,7 @@ int main(void) {
 
 	blank(1);
 
-	while(controller_state() != STICK_BUTTON) {
+	while(!(controller_state() & STICK_BUTTON)) {
 		__asm__("nop");
 	}
 

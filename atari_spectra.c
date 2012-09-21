@@ -2,7 +2,7 @@
 
 void controller_init() {
 	// Set all inputs to pull down
-	gpio_clear(CONTROLLER_PORT_ATARI, 
+	gpio_set(CONTROLLER_PORT_ATARI, 
 		STICK_RIGHT | STICK_LEFT | STICK_DOWN | STICK_UP | STICK_BUTTON);
 }
 
