@@ -106,25 +106,20 @@ int main(void) {
 
 	while(1) {
 		
-
-		
 		cnt++;
-		if (cnt == 2000)
-		{
-			// Generate food check
-			if(food.x == 99) {
-				do {
-					food.x = srrand() % xnum;
-					food.y = srrand() % ynum;
-				} while(check_point(snake, &food));
-				flip(food.x, food.y, 1);
-			}
-			continue;
-		}
-		if(cnt < 4000) {
+		if(cnt < 120000) {
 			continue;
 		} else {
 			cnt = 0;
+		}
+		// Generate food check
+		if(food.x == 99) {
+			do {
+				uint32_t b = srrand();
+				food.x = b % xnum;
+				food.y = b % ynum;
+			} while(check_point(snake, &food));
+			flip(food.x, food.y, 1);
 		}
 
 		foodflipcnt++;

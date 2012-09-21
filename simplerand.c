@@ -7,6 +7,7 @@ void srsrand(uint32_t seed) {
 }
 
 uint32_t srrand() {
-  internalrand = (internalrand >> 1) ^ (-(internalrand & 1u) & 0xD0000001u);
-  return internalrand;
+	unsigned char bit  = ((internalrand >> 0) ^ (internalrand >> 2) ^ (internalrand >> 3) ^ (internalrand >> 5) ) & 1;
+	internalrand = (internalrand >> 1) | (bit << 15);
+	return internalrand;
 }
