@@ -116,8 +116,9 @@ int main(void) {
 		if(food.x == 99) {
 			do {
 				uint32_t b = srrand();
+				b %= (xnum * ynum);
 				food.x = b % xnum;
-				food.y = b % ynum;
+				food.y = b / xnum;
 			} while(check_point(snake, &food));
 			flip(food.x, food.y, 1);
 		}
