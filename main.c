@@ -81,7 +81,7 @@ int main(void) {
 
 	blank(1);
 
-	while(!(controller_state() & STICK_BUTTON)) {
+	while(!((GPIOA_IDR & 0x0001) != 0)) {
 		__asm__("nop");
 	}
 
@@ -129,7 +129,7 @@ int main(void) {
 		}
 
 		direction_buf = controller_state();
-		if(direction_buf & STICK_BUTTON) {
+		if(((GPIOA_IDR & 0x0001) != 0)) {
 			goto RESET;
 		} else if(direction_buf == 0x00) {
 			direction = direction;
@@ -143,7 +143,7 @@ int main(void) {
 			// No movement
 			continue;
 		} else {
-			if(direction & STICK_BUTTON) {
+			if(((GPIOA_IDR & 0x0001) != 0)) {
 				blank(0);
 				goto RESET;
 				continue;
